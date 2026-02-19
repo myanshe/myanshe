@@ -77,7 +77,7 @@ https://image2.jpg"></textarea>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB06o234oj1O6FeG0s5dCglmCgWKN5EyZ0",
@@ -97,7 +97,7 @@ const loginBtn=document.getElementById('loginBtn');
 const logoutBtn=document.getElementById('logoutBtn');
 const postSection=document.getElementById('post');
 
-loginBtn.onclick=()=>signInWithPopup(auth,provider);
+loginBtn.onclick=()=>signInWithRedirect(auth,provider);
 logoutBtn.onclick=()=>signOut(auth);
 
 onAuthStateChanged(auth,user=>{
@@ -149,3 +149,4 @@ showPosts();
 </script>
 </body>
 </html>
+
