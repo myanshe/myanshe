@@ -58,7 +58,7 @@
   <h3>Post a Blog</h3>
   <input type="text" id="title" placeholder="Blog Title">
   <textarea id="content" placeholder="Write your blog..."></textarea>
-  <input type="text" id="image" placeholder="Paste Image URL here">
+  <textarea id="images" placeholder="Paste multiple Image URLs (one per line)"></textarea>
   <button id="postBtn">Post</button>
 </section>
 <section class="blogs" id="blog">
@@ -109,8 +109,10 @@ onAuthStateChanged(auth,user=>{
 async function addPost(){
   let title=document.getElementById('title').value;
   let content=document.getElementById('content').value;
-  let image=document.getElementById('image').value;
-  await addDoc(collection(db,"blogs"),{title,content,image});
+  let imagesRaw=document.getElementById('images').value;
+  let images=imagesRaw.split('
+').map(i=>i.trim()).filter(i=>i);
+  await addDoc(collection(db,"blogs"),{title,content,images});
   showPosts();
 }
 
@@ -122,7 +124,11 @@ async function showPosts(){
   const querySnapshot=await getDocs(collection(db,"blogs"));
   querySnapshot.forEach(doc=>{
     let p=doc.data();
-    container.innerHTML+=`<div class='blog-post'><h4>${p.title}</h4><p>${p.content}</p>${p.image?`<img src='${p.image}'>`:''}</div>`;
+    let imgs='';
+    if(p.images){
+      p.images.forEach(url=>{imgs+=`<img src='${url}'>`});
+    }
+    container.innerHTML+=`<div class='blog-post'><h4>${p.title}</h4><p>${p.content}</p>${imgs}</div>`;
   })
 }
 showPosts();
