@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Myanshe Blog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+    body{background:#fff6fb;color:#444}
+    header{background:#fde2f3;padding:15px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
+    header h1{color:#8e7ab5;font-weight:600;font-size:22px}
+    nav a{margin:5px 10px;text-decoration:none;color:#6c5b7b;font-size:14px}
+    .hero{background:url('https://images.unsplash.com/photo-1616046229478-9901c5536a45') center/cover;height:35vh;display:flex;justify-content:center;align-items:center;text-align:center}
+    .hero h2{background:rgba(255,255,255,0.7);padding:10px 20px;border-radius:10px;color:#6c5b7b}
+    .categories,.form-section,.blogs{padding:25px}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+    .card{background:#fff;border-radius:15px;padding:15px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+    input,textarea{width:100%;padding:10px;margin:10px 0;border-radius:8px;border:1px solid #ccc}
+    button{background:#e0bbff;border:none;padding:10px 20px;border-radius:8px;margin-top:10px}
+    .blogs{background:#f9f5ff}
+    .blog-post{background:#fff;margin-bottom:15px;padding:15px;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+    .blog-post img{width:100%;border-radius:10px;margin-top:10px}
+    .auth{padding:15px;text-align:center}
+    footer{background:#fde2f3;text-align:center;padding:20px;font-size:14px}
+    @media(max-width:600px){.hero{height:25vh}}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Myanshe</h1>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#blog">Blogs</a>
+  </nav>
+</header>
+<section class="hero">
+  <h2>Soft, Stylish & Creative Living</h2>
+</section>
+<section class="categories">
+  <h3>Explore Categories</h3>
+  <div class="cat-grid">
+    <div class="card">Home Decor</div>
+    <div class="card">Fashion</div>
+    <div class="card">Women</div>
+    <div class="card">Trendy</div>
+    <div class="card">Stylish</div>
+    <div class="card">Kids</div>
+    <div class="card">Craft</div>
+    <div class="card">DIY</div>
+  </div>
+</section>
+<div class="auth">
+  <button id="loginBtn">Login to Post</button>
+  <button id="logoutBtn" style="display:none">Logout</button>
+</div>
+<section class="form-section" id="post" style="display:none">
+  <h3>Post a Blog</h3>
+  <input type="text" id="title" placeholder="Blog Title">
+  <textarea id="content" placeholder="Write your blog..."></textarea>
+  <input type="text" id="image" placeholder="Paste Image URL here">
+  <button id="postBtn">Post</button>
+</section>
+<section class="blogs" id="blog">
+  <h3>Latest Blogs</h3>
+  <div id="blogContainer"></div>
+</section>
+<footer>
+  Contact: patraaakanshya@gmail.com
+</footer>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDzn8iBOwGYT5d7ks-uu29nRd6EP_m5AHI",
+  authDomain: "myanshe.firebaseapp.com",
+  projectId: "myanshe",
+  storageBucket: "myanshe.firebasestorage.app",
+  messagingSenderId: "843776993389",
+  appId: "1:843776993389:web:f98c71c3d9f04fe4efb764",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth();
+const provider = new GoogleAuthProvider();
+
+const loginBtn=document.getElementById('loginBtn');
+const logoutBtn=document.getElementById('logoutBtn');
+const postSection=document.getElementById('post');
+
+loginBtn.onclick=()=>signInWithPopup(auth,provider);
+logoutBtn.onclick=()=>signOut(auth);
+
+onAuthStateChanged(auth,user=>{
+  if(user && user.email==='patraaakanshya@gmail.com'){
+    postSection.style.display='block';
+    loginBtn.style.display='none';
+    logoutBtn.style.display='inline-block';
+  } else {
+    postSection.style.display='none';
+    loginBtn.style.display='inline-block';
+    logoutBtn.style.display='none';
+  }
+});
+
+async function addPost(){
+  let title=document.getElementById('title').value;
+  let content=document.getElementById('content').value;
+  let image=document.getElementById('image').value;
+  await addDoc(collection(db,"blogs"),{title,content,image});
+  showPosts();
+}
+
+document.getElementById('postBtn').onclick=addPost;
+
+async function showPosts(){
+  let container=document.getElementById('blogContainer');
+  container.innerHTML='';
+  const querySnapshot=await getDocs(collection(db,"blogs"));
+  querySnapshot.forEach(doc=>{
+    let p=doc.data();
+    container.innerHTML+=`<div class='blog-post'><h4>${p.title}</h4><p>${p.content}</p>${p.image?`<img src='${p.image}'>`:''}</div>`;
+  })
+}
+showPosts();
+</script>
+</body>
+</html>
+
