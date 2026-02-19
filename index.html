@@ -23,51 +23,35 @@
     .blog-post img{width:100%;border-radius:10px;margin-top:10px}
     .auth{padding:15px;text-align:center}
     footer{background:#fde2f3;text-align:center;padding:20px;font-size:14px}
-    @media(max-width:600px){.hero{height:25vh}}
   </style>
 </head>
 <body>
 <header>
   <h1>Myanshe</h1>
-  <nav>
-    <a href="#">Home</a>
-    <a href="#blog">Blogs</a>
-  </nav>
 </header>
-<section class="hero">
-  <h2>Soft, Stylish & Creative Living</h2>
-</section>
-<section class="categories">
-  <h3>Explore Categories</h3>
-  <div class="cat-grid">
-    <div class="card">Home Decor</div>
-    <div class="card">Fashion</div>
-    <div class="card">Women</div>
-    <div class="card">Trendy</div>
-    <div class="card">Stylish</div>
-    <div class="card">Kids</div>
-    <div class="card">Craft</div>
-    <div class="card">DIY</div>
-  </div>
-</section>
+
 <div class="auth">
   <button id="loginBtn">Login to Post</button>
   <button id="logoutBtn" style="display:none">Logout</button>
 </div>
+
 <section class="form-section" id="post" style="display:none">
   <h3>Post a Blog</h3>
   <input type="text" id="title" placeholder="Blog Title">
   <textarea id="content" placeholder="Write your blog..."></textarea>
-  <input type="text" id="image" placeholder="Paste Image URL here">
+  <textarea id="images" placeholder="Paste multiple Image URLs (one per line)"></textarea>
   <button id="postBtn">Post</button>
 </section>
-<section class="blogs" id="blog">
+
+<section class="blogs">
   <h3>Latest Blogs</h3>
   <div id="blogContainer"></div>
 </section>
+
 <footer>
   Contact: patraaakanshya@gmail.com
 </footer>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -109,8 +93,9 @@ onAuthStateChanged(auth,user=>{
 async function addPost(){
   let title=document.getElementById('title').value;
   let content=document.getElementById('content').value;
-  let image=document.getElementById('image').value;
-  await addDoc(collection(db,"blogs"),{title,content,image});
+  let imagesRaw=document.getElementById('images').value;
+  let images=imagesRaw.split('\n').map(i=>i.trim()).filter(i=>i);
+  await addDoc(collection(db,"blogs"),{title,content,images});
   showPosts();
 }
 
@@ -122,7 +107,11 @@ async function showPosts(){
   const querySnapshot=await getDocs(collection(db,"blogs"));
   querySnapshot.forEach(doc=>{
     let p=doc.data();
-    container.innerHTML+=`<div class='blog-post'><h4>${p.title}</h4><p>${p.content}</p>${p.image?`<img src='${p.image}'>`:''}</div>`;
+    let imgs='';
+    if(p.images){
+      p.images.forEach(url=>{imgs+=`<img src='${url}'>`});
+    }
+    container.innerHTML+=`<div class='blog-post'><h4>${p.title}</h4><p>${p.content}</p>${imgs}</div>`;
   })
 }
 showPosts();
